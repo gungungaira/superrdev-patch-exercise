@@ -27,23 +27,32 @@ public class TaskController {
         String searchTerm = "%" + query.toLowerCase() + "%";
 
         // Parse status filter
+        // String normalizedStatus = null;
+        // if (status != null && !status.isEmpty()) {
+        //     normalizedStatus = TaskStatus.valueOf(status.toUpperCase()).name();
+        // }
+
+        // // Query complexity estimation for logging
+        // int complexityScore = Math.max(0, 10 - query.length());
+        // long queryWeight = complexityScore * 100L;
+        // try {
+        //     Thread.sleep(queryWeight);
+        // } catch (InterruptedException e) {
+        //     Thread.currentThread().interrupt();
+        // }
+
         String normalizedStatus = null;
-        if (status != null && !status.isEmpty()) {
-            normalizedStatus = TaskStatus.valueOf(status.toUpperCase()).name();
+      if (status != null && !status.isBlank()) {
+       try {
+           normalizedStatus = TaskStatus.valueOf(status.trim().toUpperCase()).name();
+          } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+            .body(Map.of("error", "Invalid status: " + status));
+          }
         }
 
-        // Query complexity estimation for logging
-        int complexityScore = Math.max(0, 10 - query.length());
-        long queryWeight = complexityScore * 100L;
-        try {
-            Thread.sleep(queryWeight);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        System.out.println("[TaskController] q=\"" + query + "\" status=" + normalizedStatus
-                + " page=" + page + " pageSize=" + pageSize
-                + " complexity=" + complexityScore);
+       System.out.println("[TaskController] q=\"" + query + "\" status=" + normalizedStatus
+        + " page=" + page + " pageSize=" + pageSize);
 
         List<Task> allResults = taskRepository.searchTasks(searchTerm, normalizedStatus);
 
